@@ -1,9 +1,10 @@
 name: GitHub-Profile-3D-Contrib
 
 on:
-  schedule: # 每天北京时间凌晨更新一次
+  schedule:
+    # 每天北京时间凌晨 2 点自动更新
     - cron: "0 18 * * *"
-  workflow_dispatch:
+  workflow_dispatch: # 方便你手动点按钮运行
 
 jobs:
   build:
@@ -11,14 +12,21 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v3
+      
       - uses: yoshi389111/github-profile-3d-contrib@0.7.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
+          
       - name: Commit & Push
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add -A .
-          git commit -m "Generated 3D contrib"
-          git push
+          # 只有在有新图生成时才提交，防止空跑报错
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Generated 3D contrib"
+            git push
+          else
+            echo "No changes to commit"
+          fi
