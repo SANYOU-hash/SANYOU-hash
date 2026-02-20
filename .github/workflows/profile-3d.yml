@@ -1,32 +1,37 @@
-name: GitHub-Profile-3D-Contrib
+name: Generate 3D Contribution Graph
 
 on:
   schedule:
-    # 每天北京时间凌晨 2 点自动更新
-    - cron: "0 18 * * *"
-  workflow_dispatch: # 方便你手动点按钮运行
+    # 每天 UTC 00:00 运行（洛杉矶时间一般是前一天傍晚/下午）
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+# ✅ 关键：给 GITHUB_TOKEN 写入仓库内容的权限，否则容易 exit code 128
+permissions:
+  contents: write
 
 jobs:
-  build:
+  generate:
     runs-on: ubuntu-latest
-    name: generate-github-profile-3d-contrib
     steps:
-      - uses: actions/checkout@v3
-      
-      - uses: yoshi389111/github-profile-3d-contrib@0.7.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USERNAME: ${{ github.repository_owner }}
-          
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 生成 3D 贡献图到 ./profile-3d-contrib/ 目录
+      - name: Generate 3D contribution graph
+        uses: yoshi389111/github-profile-3d-contrib@0.7.1
+        with:
+          github_user_name: SANYOU-hash
+
+      # ✅ 提交生成的文件并推送回仓库
       - name: Commit & Push
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add -A .
-          # 只有在有新图生成时才提交，防止空跑报错
-          if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "Generated 3D contrib"
-            git push
-          else
-            echo "No changes to commit"
-          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          # 没有变更就不提交，避免 workflow 报错
+          git diff --cached --quiet && echo "No changes to commit." && exit 0
+
+          git commit -m "chore: update 3d contrib graph"
+          git push
