@@ -3,6 +3,7 @@
 
 ## My personal website: https://www.lucanex.top/
 ## Currently maintained project: https://vibecheck.lucanex.top/
+## EMAIL: DANNIO.NEX@hotmail.com
 ## 🧠 3D Contribution Graph
 
 ![3D Contribution](./profile-3d-contrib/profile-night-rainbow.svg)
